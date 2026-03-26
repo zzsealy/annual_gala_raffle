@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+tortoise-orm
+aerich
+pydantic
+pydantic-settings
+python-dotenv
+aiomysql
+asyncmy
+cryptography
