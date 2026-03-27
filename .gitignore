@@ -1,6 +1,7 @@
 
 /venv
 /front/node_modules
+/front/.next
 *.pyc
 __pycache__
 .vscode

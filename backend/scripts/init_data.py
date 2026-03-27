@@ -1,0 +1,112 @@
+import asyncio
+import os
+import sys
+import random
+
+# 加入项目根目录到 sys.path，确保可以导入 app (向上两级到达 backend)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+
+from tortoise import Tortoise
+from app.db import TORTOISE_ORM
+from app.models import RaffleQueue
+
+async def run():
+    await Tortoise.init(config=TORTOISE_ORM)  # 初始化数据库连接
+
+    # 先清空
+    await RaffleQueue.all().delete()
+
+    # 再插入
+    index = 10
+    # 先插入三等奖实物
+    for i in range(10):
+        create_info = {
+            'prize_level': 3,
+            'raffleQueuePersonNum': 5,
+            'desc': '三等奖实物',
+            'img_url': f'/raffle/three_gift.png',
+            'order': index
+        }
+        await RaffleQueue.create(**create_info)
+        index += 1
+    # 插入三等奖现金
+    for i in range(10):
+        create_info = {
+            'prize_level': 3,
+            'raffleQueuePersonNum': 5,
+            'desc': '三等奖现金',
+            'img_url': f'/raffle/cash.png',
+            'order': index
+        }
+        await RaffleQueue.create(**create_info)
+        index += 1
+    # 二等奖实物
+    create_info_two_gift = {
+            'prize_level': 2,
+            'raffleQueuePersonNum': 10,
+            'desc': '二等奖实物',
+            'img_url': f'/raffle/two_gift.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_two_gift)
+    index += 1
+    # 二等奖现金
+    create_info_two_cash = {
+            'prize_level': 2,
+            'raffleQueuePersonNum': 10,
+            'desc': '二等奖现金',
+            'img_url': f'/raffle/cash.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_two_cash)
+    index += 1
+
+    # 一等奖实物
+    create_info_one_gift = {
+            'prize_level': 1,
+            'raffleQueuePersonNum': 3,
+            'desc': '一等奖实物',
+            'img_url': f'/raffle/one_gift.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_one_gift)
+    index += 1
+
+    # 一等奖现金
+    create_info_one_cash = {
+            'prize_level': 1,
+            'raffleQueuePersonNum': 3,
+            'desc': '一等奖现金',
+            'img_url': f'/raffle/cash.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_one_cash)
+    index += 1
+
+    # 特等奖实物
+    create_info_special_gift = {
+            'prize_level': 0,
+            'raffleQueuePersonNum': 1,
+            'desc': '特等奖实物',
+            'img_url': f'/raffle/special_gift.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_special_gift)
+    index += 1
+
+    # 特等奖现金
+    create_info_special_cash = {
+            'prize_level': 0,
+            'raffleQueuePersonNum': 1,
+            'desc': '特等奖现金',
+            'img_url': f'/raffle/cash.png',
+            'order': index
+    }
+    await RaffleQueue.create(**create_info_special_cash)
+    index += 1
+    
+    await Tortoise.close_connections()  # 执行完毕后关闭数据库连接
+
+if __name__ == "__main__":
+    asyncio.run(run())

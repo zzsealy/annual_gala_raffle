@@ -3,8 +3,8 @@ from tortoise import fields, models
 class Participant(models.Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50, description='人员姓名')
-    code = fields.IntField(description='工号')
-    is_is_drawn = fields.BooleanField(default=False, description='是否已抽奖')
+    code = fields.CharField(max_length=50, description='工号')
+    is_drawn = fields.BooleanField(default=False, description='是否已抽奖')
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
@@ -14,23 +14,13 @@ class Participant(models.Model):
     def __str__(self):
         return self.name
 
-class Prize(models.Model):
-    id = fields.IntField(pk=True)
-    name = fields.CharField(max_length=100, description='奖品名称')
-    level = fields.IntField(description='奖项等级，1为一等奖，以此类推')
-    quantity = fields.IntField(default=1, description='奖品数量')
-    
-    class Meta:
-        table = 'prizes'
-        table_description = '年会奖品设置'
-
-    def __str__(self):
-        return self.name
 
 class RaffleRecord(models.Model):
     id = fields.IntField(pk=True)
     participant = fields.ForeignKeyField('models.Participant', related_name='records', description='中奖人')
-    prize = fields.ForeignKeyField('models.Prize', related_name='records', description='所中奖品')
+    desc = fields.CharField(max_length=100, description='抽奖描述')
+    name = fields.CharField(max_length=50, description='人员姓名')
+    code = fields.CharField(max_length=50, description='工号')
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
@@ -38,12 +28,17 @@ class RaffleRecord(models.Model):
         table_description = '中奖记录'
 
 
-class LotteryQueue(models.Model):
+class RaffleQueue(models.Model):
     id = fields.IntField(pk=True)
-    prize_level = fields.IntField(description='奖项等级，1为一等奖，以此类推')
-    LotteryQueuePersonNum = fields.IntField(description='抽奖人数')
+    prize_level = fields.IntField(description='奖项等级，1为一等奖，以此类推, 0特等奖')
+    raffleQueuePersonNum = fields.IntField(description='抽奖人数')
+    desc = fields.CharField(max_length=100, description='抽奖描述')
+    img_url = fields.CharField(max_length=100, null=True, description='图片路径，用于前端展示')
+    order = fields.IntField(description='排序，越小越靠前')
+    is_drawn = fields.BooleanField(default=False, description='是否已抽奖')
+    created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = 'lottery_queue'
+        table = 'raffle_queue'
         table_description = '抽奖队列'
     
