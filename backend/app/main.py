@@ -16,17 +16,11 @@ try:
     from app.api import router as api_router
     from app.models import Participant
 except Exception as e:
-    err_text = traceback.format_exc()
     print("❌==========================================❌")
     print("        致命错误：程序核心库载入失败！")
     print("❌==========================================❌")
-    print(err_text)
-    print("\n[为了方便发给我看，我已经把报错自动写在你 exe 同级目录下的 error_report.txt 文件里了]")
-    
-    with open("error_report.txt", "w", encoding="utf-8") as f:
-        f.write("FATAL IMPORT CRASH:\n")
-        f.write(err_text)
-
+    traceback.print_exc()
+    print("\n请把上面这段英文红色报错排版截图发来！")
     input("按回车键退出程序...")
     sys.exit(1)
 
