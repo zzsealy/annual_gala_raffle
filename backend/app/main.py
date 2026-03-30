@@ -39,11 +39,11 @@ async def health_check():
 
 app.include_router(api_router, prefix='/api')
 
-# 注册 tortoise 数据库 (它会在内部注册 startup 事件)
+# 注册 tortoise 数据库
 register_tortoise(
     app,
     config=TORTOISE_ORM,
-    generate_schemas=False,  # 因为使用 aerich 进行数据库迁移，所以这里设为 False
+    generate_schemas=True,  # 开启自动建表以保证完全跨机器可移植和可自动重新构建
     add_exception_handlers=True,
 )
 
