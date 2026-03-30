@@ -1,17 +1,28 @@
 import os
 import sys
-import time
-import threading
-import webbrowser
-import pandas as pd
-from fastapi import FastAPI
-from tortoise.contrib.fastapi import register_tortoise
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
-from app.db import TORTOISE_ORM, BASE_DIR
-from app.api import router as api_router
-from app.models import Participant
+import traceback
+
+try:
+    import time
+    import threading
+    import webbrowser
+    import pandas as pd
+    from fastapi import FastAPI
+    from tortoise.contrib.fastapi import register_tortoise
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse, HTMLResponse
+    from app.db import TORTOISE_ORM, BASE_DIR
+    from app.api import router as api_router
+    from app.models import Participant
+except Exception as e:
+    print("❌==========================================❌")
+    print("        致命错误：程序核心库载入失败！")
+    print("❌==========================================❌")
+    traceback.print_exc()
+    print("\n请把上面这段英文红色报错排版截图发来！")
+    input("按回车键退出程序...")
+    sys.exit(1)
 
 # 确保 data 目录存在，避免 sqlite 创建失败
 data_dir = BASE_DIR / "data"
