@@ -23,7 +23,7 @@ if exist dist rmdir /S /Q dist
 
 echo.
 echo Running PyInstaller...
-pyinstaller --name "AnnualRaffle" --noconfirm --onedir --add-data "static;static" --copy-metadata tortoise-orm --copy-metadata fastapi --copy-metadata pydantic --copy-metadata uvicorn --hidden-import="app.models" --hidden-import="aerich.models" --hidden-import="aiosqlite" --hidden-import="tortoise.backends.sqlite" --hidden-import="pydantic.v1" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" --hidden-import="aiofiles" --hidden-import="multipart" app/main.py
+pyinstaller --name "AnnualRaffle" --noconfirm --onedir --paths . --add-data "static;static" --copy-metadata tortoise-orm --copy-metadata fastapi --copy-metadata pydantic --copy-metadata uvicorn --hidden-import="app.models" --hidden-import="aerich.models" --hidden-import="aiosqlite" --hidden-import="tortoise.backends.sqlite" --hidden-import="pydantic.v1" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" --hidden-import="aiofiles" --hidden-import="multipart" run.py
 
 echo.
 if errorlevel 1 (
