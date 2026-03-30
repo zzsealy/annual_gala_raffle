@@ -4,12 +4,15 @@ echo 🚀 开始进行 Windows 打包...
 echo.
 
 :: 1. 尝试自动激活本目录下的虚拟环境
-if exist venv\Scripts\activate.bat (
-    echo [1/3] 检测到本地环境，正在自动激活 (venv)...
-    call venv\Scripts\activate.bat
-) else (
-    echo [1/3] 警告: 未找到 backend/venv 虚拟环境！如果你装在别的地方，请手动激活。
-)
+if not exist venv\Scripts\activate.bat goto skip_venv
+echo [1/3] 检测到本地环境，正在自动激活 (venv)...
+call venv\Scripts\activate.bat
+goto finish_venv
+
+:skip_venv
+echo [1/3] 警告: 未找到 backend/venv 虚拟环境！如果你装在别的地方，请手动激活。
+
+:finish_venv
 
 :: 2. 检查安装
 echo.
