@@ -10,3 +10,5 @@ aiosqlite
 cryptography
 pandas
 openpyxl
+aiofiles
+python-multipart
