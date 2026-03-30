@@ -12,8 +12,9 @@ echo WARNING: backend\venv not found! Using global python environment.
 
 :finish_venv
 echo.
-echo Installing PyInstaller...
-pip install pyinstaller
+echo Installing requirements...
+pip install -r requirements.txt
+pip install pyinstaller pandas openpyxl
 
 echo.
 echo Cleaning previous builds...

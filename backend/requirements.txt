@@ -8,3 +8,5 @@ python-dotenv
 # MySQL deps: aiomysql, asyncmy
 aiosqlite
 cryptography
+pandas
+openpyxl
