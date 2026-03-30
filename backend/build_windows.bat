@@ -1,31 +1,35 @@
 @echo off
 chcp 65001 >nul
 echo 🚀 开始进行 Windows 打包...
-echo 1. 确保你已经在虚拟环境中安装了所需依赖 (pip install -r requirements.txt)
-echo 2. 检查并安装 PyInstaller 工具
+echo.
+
+:: 1. 尝试自动激活本目录下的虚拟环境
+if exist venv\Scripts\activate.bat (
+    echo [1/3] 检测到本地环境，正在自动激活 (venv)...
+    call venv\Scripts\activate.bat
+) else (
+    echo [1/3] 警告: 未找到 backend/venv 虚拟环境！如果你装在别的地方，请手动激活。
+)
+
+:: 2. 检查安装
+echo.
+echo [2/3] 检查并安装打包必备工具：PyInstaller...
 pip install pyinstaller
 
 echo.
-echo 3. 开始执行核心打包逻辑...
-:: 清理过去的残留编译文件
+echo [3/3] 开始执行核心编译逻辑...
 if exist build rmdir /S /Q build
 if exist dist rmdir /S /Q dist
 
-:: 核心打包命令
-:: --name: 最终生成的 exe 名字
-:: --noconfirm: 不需询问，直接覆盖上次产出
-:: --onedir: 推荐模式，生成文件夹而不是单体exe（单体exe解压极慢且容易被杀毒软件误杀）
-:: --add-data "static;static": 将你编译好的炫酷前端挂载到_MEIPASS虚拟目录
-:: --hidden-import: 防止 Tortoise ORM 动态加载的模块以及 SQLite 驱动在打包时丢失
-pyinstaller --name "年会抽奖系统" --noconfirm --onedir --add-data "static;static" --hidden-import="app.models" --hidden-import="aiosqlite" --hidden-import="tortoise.backends.sqlite" --hidden-import="pydantic.v1" app/main.py
+:: 许多人在打包 FastAPI 项目后闪退，通常是底层 uvicorn/tortoise 相关的动态库在打包阶段丢失。
+:: 所以下面这一长串 --hidden-import 就是用来彻底根治闪退问题的。
+pyinstaller --name "年会抽奖系统" --noconfirm --onedir --add-data "static;static" --hidden-import="app.models" --hidden-import="aerich.models" --hidden-import="aiosqlite" --hidden-import="tortoise.backends.sqlite" --hidden-import="pydantic.v1" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.protocols.websockets" --hidden-import="uvicorn.protocols.websockets.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" app/main.py
 
 echo.
 echo 🎉 打包完成！
-echo 👉 你的交付程序在【dist\年会抽奖系统】文件夹里。
+echo 👉 你的无木马绿色版交付程序在【dist\年会抽奖系统】文件夹里。
 echo.
-echo 【最后重要操作提醒，发给领导前必做】：
-echo 1. 去 dist\年会抽奖系统 文件夹里，手动新建一个名叫 data 文件夹。
-echo 2. 把你的 .env 文件复制进 dist\年会抽奖系统 文件夹（放在 exe 旁边）。
-echo 3. 把你要抽奖的名单 person.xlsx 也可以复制进去。
+echo 【最后记得】：
+echo 去 dist\年会抽奖系统 里手动复制一份 .env 放进去。
 echo.
 pause

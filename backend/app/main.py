@@ -134,11 +134,17 @@ else:
 # 打包入口（给 PyInstaller 用的）
 # ================================
 if __name__ == "__main__":
-    import uvicorn
-    import multiprocessing
-    # 支持在 Windows 环境下被打包成 exe 后多进程运行稳定
-    multiprocessing.freeze_support()
-    
-    print("🚀 正在启动单机版后台服务...")
-    # 打包模式下无需使用字符串加载并关掉热更，可直接跑 app 实例
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # 添加一个 try-except 捕获所有异常，防止 Windows 双击直接闪退
+    try:
+        import uvicorn
+        import multiprocessing
+        # 支持在 Windows 环境下被打包成 exe 后多进程运行稳定
+        multiprocessing.freeze_support()
+        
+        print("🚀 正在启动单机版后台服务...")
+        # 打包模式下无需使用字符串加载并关掉热更，可直接跑 app 实例
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        input("❌ 服务启动失败！如上所示。按回车键退出...")
