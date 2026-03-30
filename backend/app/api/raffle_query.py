@@ -15,6 +15,13 @@ async def get_raffle_queue():
     raffle_queue = await RaffleQueue.filter(is_drawn=False).order_by('order').values()
     return raffle_queue
 
+from scripts.init_data import reset_db_data
+
+@router.post("/raffle_queue/reset")
+async def reset_raffle():
+    await reset_db_data()
+    return {"status": "success"}
+
 @router.post("/raffle_queue/add")
 async def add_raffle_queue(input: AddQueueInput):
     # 根据等级和类型生成配置

@@ -9,12 +9,16 @@ sys.path.append(BASE_DIR)
 
 from tortoise import Tortoise
 from app.db import TORTOISE_ORM
-from app.models import RaffleQueue
+from app.models import RaffleQueue, Participant, RaffleRecord
 
-async def run():
-    await Tortoise.init(config=TORTOISE_ORM)  # 初始化数据库连接
+async def reset_db_data():
+    # 清空所有中奖记录
+    await RaffleRecord.all().delete()
+    
+    # 重置所有人员未中奖状态
+    await Participant.all().update(is_drawn=False)
 
-    # 先清空
+    # 清空抽奖队列
     await RaffleQueue.all().delete()
 
     # 再插入
@@ -104,8 +108,10 @@ async def run():
             'order': index
     }
     await RaffleQueue.create(**create_info_special_cash)
-    index += 1
-    
+
+async def run():
+    await Tortoise.init(config=TORTOISE_ORM)  # 初始化数据库连接
+    await reset_db_data()
     await Tortoise.close_connections()  # 执行完毕后关闭数据库连接
 
 if __name__ == "__main__":

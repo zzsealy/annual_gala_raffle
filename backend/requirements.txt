@@ -5,6 +5,6 @@ aerich
 pydantic
 pydantic-settings
 python-dotenv
-aiomysql
-asyncmy
+# MySQL deps: aiomysql, asyncmy
+aiosqlite
 cryptography
