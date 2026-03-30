@@ -1,5 +1,8 @@
 import os
 import sys
+import time
+import threading
+import webbrowser
 import pandas as pd
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
@@ -33,9 +36,19 @@ register_tortoise(
     add_exception_handlers=True,
 )
 
+def open_browser():
+    time.sleep(1.5)  # 稍微等一秒，确保服务器完全启动
+    url = "http://127.0.0.1:8000"
+    print(f"🌍 正在打开浏览器访问: {url}")
+    webbrowser.open(url)
+
 @app.on_event("startup")
 async def load_excel_on_startup():
-    """每次启动时，如果根目录下存在 person.xlsx，就自动读取覆盖数据库内容"""
+    """每次启动时，如果是单机执行文件，就弹网页；如果根目录下存在 person.xlsx，就自动读取覆盖数据库内容"""
+    
+    # 检测到是打包版exe运行时，触发自动弹窗网页
+    if getattr(sys, 'frozen', False):
+        threading.Thread(target=open_browser, daemon=True).start()
     
     # 兼容打包后 exe 所在的同级目录 / 无论是普通运行还是 exe 运行
     current_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.getcwd()
@@ -74,7 +87,12 @@ app.add_middleware(
 # ================================
 # 单机部署：托管静态前端页面
 # ================================
-static_dir = os.path.join(os.path.dirname(BASE_DIR), "backend", "static")
+if getattr(sys, 'frozen', False):
+    # exe 打包后，如果用了 --add-data "static;static"，它会在 _MEIPASS 临时缓存内部
+    static_dir = os.path.join(sys._MEIPASS, "static")
+else:
+    # 源码运行时在 backend/static 目录
+    static_dir = os.path.join(BASE_DIR, "static")
 
 if os.path.exists(static_dir):
     # 挂载一些固定的静态资源目录，以提升性能
@@ -111,3 +129,16 @@ if os.path.exists(static_dir):
         return HTMLResponse("前端静态文件缺失或尚未编译", status_code=404)
 else:
     print("⚠️ 警告：未找到 static 文件夹，前端页面将无法访问。请将 frontend 打包后的 out 文件夹复制为 backend/static。")
+
+# ================================
+# 打包入口（给 PyInstaller 用的）
+# ================================
+if __name__ == "__main__":
+    import uvicorn
+    import multiprocessing
+    # 支持在 Windows 环境下被打包成 exe 后多进程运行稳定
+    multiprocessing.freeze_support()
+    
+    print("🚀 正在启动单机版后台服务...")
+    # 打包模式下无需使用字符串加载并关掉热更，可直接跑 app 实例
+    uvicorn.run(app, host="0.0.0.0", port=8000)

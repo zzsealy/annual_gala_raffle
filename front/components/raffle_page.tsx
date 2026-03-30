@@ -75,20 +75,42 @@ export default function RafflePage({
     }
   }, [persons]);
 
-  // 触发礼花动画
+  // 触发强化版礼花动画
   const fireCorners = () => {
+    // 1. 左下角巨大爆发
     confetti({
-      particleCount: 100,
+      particleCount: 200,
       angle: 60,
-      spread: 70,
+      spread: 100,
       origin: { x: 0, y: 1 },
+      startVelocity: 70,
+      scalar: 1.5, // 纸屑放大 1.5 倍
+      zIndex: 100
     });
+    
+    // 2. 右下角巨大爆发
     confetti({
-      particleCount: 100,
+      particleCount: 200,
       angle: 120,
-      spread: 70,
+      spread: 100,
       origin: { x: 1, y: 1 },
+      startVelocity: 70,
+      scalar: 1.5,
+      zIndex: 100
     });
+
+    // 3. 半秒后在中间下起金红大爆竹雨
+    setTimeout(() => {
+      confetti({
+        particleCount: 250,
+        spread: 180,
+        origin: { y: 0.6 },
+        startVelocity: 50,
+        scalar: 1.8, // 纸屑放大 1.8 倍
+        zIndex: 100,
+        colors: ['#FFE7B4', '#DE1010', '#FFFFFF', '#FFD700', '#FF4500']
+      });
+    }, 400);
   };
 
   const fetch_winners = async () => {
