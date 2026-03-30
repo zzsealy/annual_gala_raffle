@@ -8,6 +8,9 @@ router = APIRouter()
 
 @router.post("/upload_person")
 async def upload_person(file: UploadFile = File(...)):
+    # 先删除
+    await Participant.all().delete()
+    # 再上传创建
     contents = await file.read()
     df = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
     participant_list = []

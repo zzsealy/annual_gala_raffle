@@ -4,6 +4,8 @@ import pandas as pd
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
 from app.db import TORTOISE_ORM, BASE_DIR
 from app.api import router as api_router
 from app.models import Participant
@@ -68,3 +70,44 @@ app.add_middleware(
     allow_headers=["*"],          # 允许所有请求头
     expose_headers=["Content-Disposition"] 
 )
+
+# ================================
+# 单机部署：托管静态前端页面
+# ================================
+static_dir = os.path.join(os.path.dirname(BASE_DIR), "backend", "static")
+
+if os.path.exists(static_dir):
+    # 挂载一些固定的静态资源目录，以提升性能
+    _next_dir = os.path.join(static_dir, "_next")
+    if os.path.exists(_next_dir):
+        app.mount("/_next", StaticFiles(directory=_next_dir), name="next_assets")
+        
+    images_dir = os.path.join(static_dir, "images")
+    if os.path.exists(images_dir):
+        app.mount("/images", StaticFiles(directory=images_dir), name="next_images")
+
+    # 捕获所有其他非 api 请求，托管静态文件和前端伪路由
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        if full_path.startswith("api/"):
+            return HTMLResponse("API route not found", status_code=404)
+            
+        static_file_path = os.path.join(static_dir, full_path)
+        
+        # 1. 寻找确切的文件 (e.g., favicon.ico)
+        if full_path and os.path.isfile(static_file_path):
+            return FileResponse(static_file_path)
+            
+        # 2. 寻找 Next.js 生成的 html 路由 (例如 访问 /config 返回 config.html)
+        html_file_path = f"{static_file_path}.html"
+        if os.path.isfile(html_file_path):
+            return FileResponse(html_file_path)
+            
+        # 3. 兜底返回主页
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+            
+        return HTMLResponse("前端静态文件缺失或尚未编译", status_code=404)
+else:
+    print("⚠️ 警告：未找到 static 文件夹，前端页面将无法访问。请将 frontend 打包后的 out 文件夹复制为 backend/static。")
