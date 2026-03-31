@@ -29,7 +29,6 @@ export default function IndexPage() {
     setRaffleQueuePersonNum(res[0].raffleQueuePersonNum);
     setImageUrl(res[0].img_url);
     setQueueId(res[0].id);
-    debugger;
     setRaffleLevelDesc(res[0].desc);
   };
 
