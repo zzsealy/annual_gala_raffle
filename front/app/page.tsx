@@ -13,6 +13,7 @@ export default function IndexPage() {
   const [persons, setPersons] = useState([]);
   const [queueId, setQueueId] = useState(0); // 抽奖队列的id
   const [canRaffle, setCanRaffle] = useState(true);
+  const [raffle_level_desc, setRaffleLevelDesc] = useState("");
 
   const fetch_raffle_queue = async () => {
     const res: any[] = await ky
@@ -28,6 +29,8 @@ export default function IndexPage() {
     setRaffleQueuePersonNum(res[0].raffleQueuePersonNum);
     setImageUrl(res[0].img_url);
     setQueueId(res[0].id);
+    debugger;
+    setRaffleLevelDesc(res[0].desc);
   };
 
   const fetch_persons = async () => {
@@ -49,6 +52,8 @@ export default function IndexPage() {
         router.push("/raffle_home");
       } else if (e.key.toLowerCase() === "g") {
         router.push("/config");
+      } else if (e.key === " ") {
+        router.push("/winners");
       }
     };
 
@@ -72,6 +77,7 @@ export default function IndexPage() {
         persons={persons}
         queueId={queueId}
         canRaffle={canRaffle}
+        raffle_level_desc={raffle_level_desc}
         onClose={() => {
           fetch_raffle_queue();
           fetch_persons();

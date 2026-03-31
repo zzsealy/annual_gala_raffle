@@ -12,6 +12,7 @@ export default function RafflePage({
   persons,
   queueId,
   canRaffle,
+  raffle_level_desc,
   onClose,
 }: {
   raffle_level: number;
@@ -20,6 +21,7 @@ export default function RafflePage({
   persons: any[];
   queueId: number;
   canRaffle: boolean;
+  raffle_level_desc: string;
   onClose?: () => void;
 }) {
   // 状态管理
@@ -85,9 +87,9 @@ export default function RafflePage({
       origin: { x: 0, y: 1 },
       startVelocity: 70,
       scalar: 1.5, // 纸屑放大 1.5 倍
-      zIndex: 100
+      zIndex: 100,
     });
-    
+
     // 2. 右下角巨大爆发
     confetti({
       particleCount: 200,
@@ -96,7 +98,7 @@ export default function RafflePage({
       origin: { x: 1, y: 1 },
       startVelocity: 70,
       scalar: 1.5,
-      zIndex: 100
+      zIndex: 100,
     });
 
     // 3. 半秒后在中间下起金红大爆竹雨
@@ -108,7 +110,7 @@ export default function RafflePage({
         startVelocity: 50,
         scalar: 1.8, // 纸屑放大 1.8 倍
         zIndex: 100,
-        colors: ['#FFE7B4', '#DE1010', '#FFFFFF', '#FFD700', '#FF4500']
+        colors: ["#FFE7B4", "#DE1010", "#FFFFFF", "#FFD700", "#FF4500"],
       });
     }, 400);
   };
@@ -163,10 +165,10 @@ export default function RafflePage({
   return (
     <div
       className="relative w-screen h-screen overflow-hidden bg-no-repeat"
-      style={{ 
+      style={{
         backgroundImage: "url('/images/raffle/background.png')",
         backgroundSize: "102% 102%",
-        backgroundPosition: "-2vw center" 
+        backgroundPosition: "-2vw center",
       }}
     >
       {/* 纯 CSS 动画统一定义区 */}
@@ -205,7 +207,8 @@ export default function RafflePage({
           style={{
             WebkitTextStroke: "1px #DE1010",
             letterSpacing: "8px",
-            fontFamily: '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif',
+            fontFamily:
+              '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif',
           }}
         >
           普析35周年盛典暨第十五届职工代表大会抽奖活动
@@ -335,7 +338,7 @@ export default function RafflePage({
                   style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.5)" }}
                 >
                   {/* 例如这里可以用 {prize_desc || "现金200元"} */}
-                  [这里放奖品描述占位]
+                  {raffle_level_desc}
                 </p>
               </div>
             </motion.div>

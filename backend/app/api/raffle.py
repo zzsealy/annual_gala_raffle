@@ -52,3 +52,7 @@ async def raffle(input: InputSchema):
         await RaffleRecord.bulk_create(records)
         
         return winners
+
+@router.get("/raffle_records")
+async def get_raffle_records():
+    return await RaffleRecord.all().order_by('-created_at').values('name', 'code', 'desc')

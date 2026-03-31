@@ -12,6 +12,10 @@ export default function rafflePage() {
       // 监听回车键返回主页
       if (e.key === "Enter") {
         router.push("/");
+      } else if (e.key.toLowerCase() === "g") {
+        router.push("/config");
+      } else if (e.key === " ") {
+        router.push("/winners");
       }
     };
     window.addEventListener("keydown", handleKeyDown);

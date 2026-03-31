@@ -28,7 +28,7 @@ async def reset_db_data():
         create_info = {
             'prize_level': 3,
             'raffleQueuePersonNum': 5,
-            'desc': '三等奖实物',
+            'desc': '背包',
             'img_url': f'/raffle/three_gift.png',
             'order': index
         }
@@ -39,7 +39,7 @@ async def reset_db_data():
         create_info = {
             'prize_level': 3,
             'raffleQueuePersonNum': 5,
-            'desc': '三等奖现金',
+            'desc': '现金200元',
             'img_url': f'/raffle/cash.png',
             'order': index
         }
@@ -49,7 +49,7 @@ async def reset_db_data():
     create_info_two_gift = {
             'prize_level': 2,
             'raffleQueuePersonNum': 10,
-            'desc': '二等奖实物',
+            'desc': '剃须刀',
             'img_url': f'/raffle/two_gift.png',
             'order': index
     }
@@ -59,7 +59,7 @@ async def reset_db_data():
     create_info_two_cash = {
             'prize_level': 2,
             'raffleQueuePersonNum': 10,
-            'desc': '二等奖现金',
+            'desc': '现金500元',
             'img_url': f'/raffle/cash.png',
             'order': index
     }
@@ -70,7 +70,7 @@ async def reset_db_data():
     create_info_one_gift = {
             'prize_level': 1,
             'raffleQueuePersonNum': 3,
-            'desc': '一等奖实物',
+            'desc': '智能手表',
             'img_url': f'/raffle/one_gift.png',
             'order': index
     }
@@ -81,7 +81,7 @@ async def reset_db_data():
     create_info_one_cash = {
             'prize_level': 1,
             'raffleQueuePersonNum': 3,
-            'desc': '一等奖现金',
+            'desc': '现金1000元',
             'img_url': f'/raffle/cash.png',
             'order': index
     }
@@ -92,7 +92,7 @@ async def reset_db_data():
     create_info_special_gift = {
             'prize_level': 0,
             'raffleQueuePersonNum': 1,
-            'desc': '特等奖实物',
+            'desc': '平板电脑',
             'img_url': f'/raffle/special_gift.png',
             'order': index
     }
@@ -103,7 +103,7 @@ async def reset_db_data():
     create_info_special_cash = {
             'prize_level': 0,
             'raffleQueuePersonNum': 1,
-            'desc': '特等奖现金',
+            'desc': '现金3000元',
             'img_url': f'/raffle/cash.png',
             'order': index
     }
