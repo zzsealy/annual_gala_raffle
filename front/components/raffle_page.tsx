@@ -201,8 +201,12 @@ export default function RafflePage({
       {/* 顶部标题 */}
       <div className="absolute top-6 left-0 right-0 z-10 flex justify-center pointer-events-none">
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#FFE7B4] tracking-widest drop-shadow-[0_4px_8px_rgba(200,0,0,0.8)]"
-          style={{ WebkitTextStroke: "1px #DE1010" }}
+          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#FFE7B4] drop-shadow-[0_4px_8px_rgba(200,0,0,0.8)]"
+          style={{
+            WebkitTextStroke: "1px #DE1010",
+            letterSpacing: "8px",
+            fontFamily: '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif',
+          }}
         >
           普析35周年盛典暨第十五届职工代表大会抽奖活动
         </h1>
