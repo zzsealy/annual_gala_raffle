@@ -24,23 +24,23 @@ async def reset_db_data():
     # 再插入
     index = 10
     # 先插入三等奖实物
-    for i in range(10):
+    for i in range(5):
         create_info = {
             'prize_level': 3,
-            'raffleQueuePersonNum': 5,
+            'raffleQueuePersonNum': 10,
             'desc': '背包',
-            'img_url': f'/raffle/three_gift.png',
+            'img_url': '/raffle/three_gift.png',
             'order': index
         }
         await RaffleQueue.create(**create_info)
         index += 1
     # 插入三等奖现金
-    for i in range(10):
+    for i in range(5):
         create_info = {
             'prize_level': 3,
-            'raffleQueuePersonNum': 5,
+            'raffleQueuePersonNum': 10,
             'desc': '现金200元',
-            'img_url': f'/raffle/cash.png',
+            'img_url': '/raffle/cash.png',
             'order': index
         }
         await RaffleQueue.create(**create_info)
@@ -50,7 +50,7 @@ async def reset_db_data():
             'prize_level': 2,
             'raffleQueuePersonNum': 10,
             'desc': '剃须刀',
-            'img_url': f'/raffle/two_gift.png',
+            'img_url': '/raffle/two_gift.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_two_gift)
@@ -60,7 +60,7 @@ async def reset_db_data():
             'prize_level': 2,
             'raffleQueuePersonNum': 10,
             'desc': '现金500元',
-            'img_url': f'/raffle/cash.png',
+            'img_url': '/raffle/cash.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_two_cash)
@@ -71,7 +71,7 @@ async def reset_db_data():
             'prize_level': 1,
             'raffleQueuePersonNum': 3,
             'desc': '智能手表',
-            'img_url': f'/raffle/one_gift.png',
+            'img_url': '/raffle/one_gift.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_one_gift)
@@ -82,7 +82,7 @@ async def reset_db_data():
             'prize_level': 1,
             'raffleQueuePersonNum': 3,
             'desc': '现金1000元',
-            'img_url': f'/raffle/cash.png',
+            'img_url': '/raffle/cash.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_one_cash)
@@ -93,7 +93,7 @@ async def reset_db_data():
             'prize_level': 0,
             'raffleQueuePersonNum': 1,
             'desc': '平板电脑',
-            'img_url': f'/raffle/special_gift.png',
+            'img_url': '/raffle/special_gift.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_special_gift)
@@ -104,7 +104,7 @@ async def reset_db_data():
             'prize_level': 0,
             'raffleQueuePersonNum': 1,
             'desc': '现金3000元',
-            'img_url': f'/raffle/cash.png',
+            'img_url': '/raffle/cash.png',
             'order': index
     }
     await RaffleQueue.create(**create_info_special_cash)

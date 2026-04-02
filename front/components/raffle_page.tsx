@@ -143,15 +143,77 @@ export default function RafflePage({
     fireCorners(); // 放礼花！
   };
 
-  // 根据中奖人数决定网格列数 (如果是 10 个人，就是 2行5列，如果是更少，就自适应平铺)
-  const gridColsClass =
-    raffleQueuePersonNum >= 5
-      ? "grid-cols-5"
-      : raffleQueuePersonNum === 3
-        ? "grid-cols-3"
-        : raffleQueuePersonNum === 2
-          ? "grid-cols-2"
-          : "grid-cols-1";
+  const winnerCount = winners.length || raffleQueuePersonNum;
+
+  const getWinnerLayout = (level: number, count: number) => {
+    const safeCount = Math.max(count, 1);
+
+    if (level === 0) {
+      if (safeCount === 1) {
+        return {
+          containerClass: "w-[clamp(220px,20vw,320px)]",
+          columns: 1,
+          cardAspectRatio: "1.05 / 1",
+          codeFontSize: "clamp(28px, 2.2vw, 40px)",
+          nameFontSize: "clamp(24px, 1.8vw, 34px)",
+        };
+      }
+
+      if (safeCount === 2) {
+        return {
+          containerClass: "w-[min(52vw,720px)]",
+          columns: 2,
+          cardAspectRatio: "1.15 / 1",
+          codeFontSize: "clamp(24px, 2vw, 34px)",
+          nameFontSize: "clamp(20px, 1.6vw, 28px)",
+        };
+      }
+
+      if (safeCount <= 4) {
+        return {
+          containerClass: "w-[min(58vw,820px)]",
+          columns: 2,
+          cardAspectRatio: "1.25 / 1",
+          codeFontSize: "clamp(22px, 1.8vw, 30px)",
+          nameFontSize: "clamp(18px, 1.4vw, 24px)",
+        };
+      }
+
+      if (safeCount <= 6) {
+        return {
+          containerClass: "w-[min(72vw,980px)]",
+          columns: 3,
+          cardAspectRatio: "1.35 / 1",
+          codeFontSize: "clamp(20px, 1.6vw, 28px)",
+          nameFontSize: "clamp(17px, 1.25vw, 22px)",
+        };
+      }
+
+      return {
+        containerClass: "w-[min(82vw,1180px)]",
+        columns: Math.min(4, safeCount),
+        cardAspectRatio: "1.45 / 1",
+        codeFontSize: "clamp(18px, 1.45vw, 24px)",
+        nameFontSize: "clamp(16px, 1.1vw, 20px)",
+      };
+    }
+
+    return {
+      containerClass:
+        safeCount === 1 ? "w-[clamp(240px,24vw,360px)]" : "w-[80%] max-w-6xl",
+      columns:
+        safeCount >= 5 ? 5 : safeCount === 3 ? 3 : safeCount === 2 ? 2 : 1,
+      cardAspectRatio: safeCount === 1 ? "1.2 / 1" : "2 / 1",
+      codeFontSize:
+        safeCount === 1 ? "clamp(26px, 2.2vw, 38px)" : "clamp(20px, 2vw, 32px)",
+      nameFontSize:
+        safeCount === 1
+          ? "clamp(22px, 1.8vw, 32px)"
+          : "clamp(18px, 1.6vw, 26px)",
+    };
+  };
+
+  const winnerLayout = getWinnerLayout(raffle_level, winnerCount);
 
   // 获取奖项名称
   const getPrizeName = (level: number) => {
@@ -345,7 +407,7 @@ export default function RafflePage({
 
             {/* 下方的中奖名单展示区 */}
             <motion.div
-              className={`grid gap-4 md:gap-6 ${raffle_level === 0 ? "w-[30%] max-w-xl" : "w-[80%] max-w-6xl"} ${gridColsClass}`}
+              className={`grid gap-4 md:gap-6 ${winnerLayout.containerClass}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{
@@ -353,6 +415,9 @@ export default function RafflePage({
                 type: "spring",
                 stiffness: 300,
                 damping: 25,
+              }}
+              style={{
+                gridTemplateColumns: `repeat(${winnerLayout.columns}, minmax(0, 1fr))`,
               }}
             >
               {winners.map((winner, idx) => (
@@ -366,18 +431,18 @@ export default function RafflePage({
                     // 中奖名单卡片使用了你提供的浅黄/橘黄效果
                     background:
                       "linear-gradient(180deg, #FFF6D8 0%, #FFD375 100%)",
-                    // --- 你可以在这里调整这张黄色卡片的长宽比 ---
-                    // 特等奖（1个人）时，让它稍微方一点，不要太扁
-                    aspectRatio: raffle_level === 0 ? "1.2 / 1" : "2 / 1",
+                    aspectRatio: winnerLayout.cardAspectRatio,
                   }}
                 >
                   <span
-                    className={`text-[#960000] font-bold leading-tight mb-1 ${raffle_level === 0 ? "text-[3vw]" : "text-[2.2vw]"}`}
+                    className="text-[#960000] font-bold leading-tight mb-1"
+                    style={{ fontSize: winnerLayout.codeFontSize }}
                   >
                     {winner.code}
                   </span>
                   <span
-                    className={`text-[#B51E1E] font-medium ${raffle_level === 0 ? "text-[2.5vw]" : "text-[1.8vw]"}`}
+                    className="text-[#B51E1E] font-medium"
+                    style={{ fontSize: winnerLayout.nameFontSize }}
                   >
                     {winner.name}
                   </span>

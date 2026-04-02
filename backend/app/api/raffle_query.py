@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.models import RaffleQueue
+from scripts.init_data import reset_db_data
 
 router = APIRouter()
 
@@ -15,7 +16,6 @@ async def get_raffle_queue():
     raffle_queue = await RaffleQueue.filter(is_drawn=False).order_by('order').values()
     return raffle_queue
 
-from scripts.init_data import reset_db_data
 
 @router.post("/raffle_queue/reset")
 async def reset_raffle():
@@ -26,14 +26,14 @@ async def reset_raffle():
 async def add_raffle_queue(input: AddQueueInput):
     # 根据等级和类型生成配置
     level_map = {
-        0: {'name': '特等奖', 'personNum': 1, 'gift_img': '/raffle/special_gift.png'},
-        1: {'name': '一等奖', 'personNum': 3, 'gift_img': '/raffle/one_gift.png'},
-        2: {'name': '二等奖', 'personNum': 10, 'gift_img': '/raffle/two_gift.png'},
-        3: {'name': '三等奖', 'personNum': 5, 'gift_img': '/raffle/three_gift.png'},
+        0: {'name': '平板电脑', 'cash': '现金3000元', 'gift_img': '/raffle/special_gift.png'},
+        1: {'name': '智能手表', 'cash': '现金1000元', 'gift_img': '/raffle/one_gift.png'},
+        2: {'name': '剃须刀', 'cash': '现金500元', 'gift_img': '/raffle/two_gift.png'},
+        3: {'name': '背包', 'cash': '现金200元', 'gift_img': '/raffle/three_gift.png'},
     }
     
     config = level_map.get(input.prize_level, level_map[3])
-    desc = f"{config['name']}实物" if input.prize_type == 'gift' else f"{config['name']}现金"
+    desc = f"{config['name']}" if input.prize_type == 'gift' else f"{config['cash']}"
     img_url = config['gift_img'] if input.prize_type == 'gift' else '/raffle/cash.png'
     person_num = input.person_num
     
