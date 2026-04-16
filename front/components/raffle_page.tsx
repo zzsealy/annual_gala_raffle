@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import ky from "ky";
+
+const SPECIAL_PRIZE_DISPLAY_NAME = "华为折叠屏手机";
 
 export default function RafflePage({
   raffle_level,
@@ -24,10 +26,15 @@ export default function RafflePage({
   raffle_level_desc: string;
   onClose?: () => void;
 }) {
+  const isGrandPrize = raffle_level === 0 || raffle_level === -1;
+  const titleContainerRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+
   // 状态管理
   const [isRolling, setIsRolling] = useState(false);
   const [isDrawn, setIsDrawn] = useState(false);
   const [winners, setWinners] = useState<{ code: string; name: string }[]>([]);
+  const [titleScale, setTitleScale] = useState(1);
 
   // 基于真实传入的人员数据用于背景滚动
   const generateMockBlocks = () => {
@@ -76,6 +83,40 @@ export default function RafflePage({
       ]);
     }
   }, [persons]);
+
+  useEffect(() => {
+    const updateTitleScale = () => {
+      if (!titleContainerRef.current || !titleRef.current) {
+        return;
+      }
+
+      const availableWidth = titleContainerRef.current.clientWidth;
+      const titleWidth = titleRef.current.scrollWidth;
+
+      if (!availableWidth || !titleWidth) {
+        return;
+      }
+
+      setTitleScale(Math.min(1, availableWidth / titleWidth));
+    };
+
+    updateTitleScale();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateTitleScale();
+    });
+
+    if (titleContainerRef.current) {
+      resizeObserver.observe(titleContainerRef.current);
+    }
+
+    window.addEventListener("resize", updateTitleScale);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateTitleScale);
+    };
+  }, []);
 
   // 触发强化版礼花动画
   const fireCorners = () => {
@@ -148,7 +189,7 @@ export default function RafflePage({
   const getWinnerLayout = (level: number, count: number) => {
     const safeCount = Math.max(count, 1);
 
-    if (level === 0) {
+    if (level === 0 || level === -1) {
       if (safeCount === 1) {
         return {
           containerClass: "w-[clamp(220px,20vw,320px)]",
@@ -200,9 +241,21 @@ export default function RafflePage({
 
     return {
       containerClass:
-        safeCount === 1 ? "w-[clamp(240px,24vw,360px)]" : "w-[80%] max-w-6xl",
+        safeCount === 1
+          ? "w-[clamp(240px,24vw,360px)]"
+          : safeCount === 4
+            ? "w-[min(72vw,960px)]"
+            : "w-[80%] max-w-6xl",
       columns:
-        safeCount >= 5 ? 5 : safeCount === 3 ? 3 : safeCount === 2 ? 2 : 1,
+        safeCount >= 5
+          ? 5
+          : safeCount === 4
+            ? 2
+            : safeCount === 3
+              ? 3
+              : safeCount === 2
+                ? 2
+                : 1,
       cardAspectRatio: safeCount === 1 ? "1.2 / 1" : "2 / 1",
       codeFontSize:
         safeCount === 1 ? "clamp(26px, 2.2vw, 38px)" : "clamp(20px, 2vw, 32px)",
@@ -217,12 +270,19 @@ export default function RafflePage({
 
   // 获取奖项名称
   const getPrizeName = (level: number) => {
+    if (level === -1) return "特别大奖";
     if (level === 0) return "特等奖";
     if (level === 1) return "一等奖";
     if (level === 2) return "二等奖";
     if (level === 3) return "三等奖";
     return `${level}等奖`;
   };
+
+  const specialPrizeTitle = raffle_level === -1 ? raffle_level_desc : "";
+  const prizeTitle =
+    raffle_level === -1 ? specialPrizeTitle : getPrizeName(raffle_level);
+  const prizeDesc =
+    raffle_level === -1 ? SPECIAL_PRIZE_DISPLAY_NAME : raffle_level_desc;
 
   return (
     <div
@@ -263,14 +323,21 @@ export default function RafflePage({
       />
 
       {/* 顶部标题 */}
-      <div className="absolute top-6 left-0 right-0 z-10 flex justify-center pointer-events-none">
+      <div
+        ref={titleContainerRef}
+        className="absolute top-6 left-1/2 z-10 w-[calc(100vw-48px)] -translate-x-1/2 pointer-events-none"
+      >
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#FFE7B4] drop-shadow-[0_4px_8px_rgba(200,0,0,0.8)]"
+          ref={titleRef}
+          className="mx-auto w-max whitespace-nowrap font-extrabold text-[#FFE7B4] drop-shadow-[0_4px_8px_rgba(200,0,0,0.8)]"
           style={{
+            fontSize: "clamp(20px, 3.3vw, 60px)",
             WebkitTextStroke: "1px #DE1010",
-            letterSpacing: "8px",
+            letterSpacing: "0.12em",
             fontFamily:
               '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif',
+            transform: `scale(${titleScale})`,
+            transformOrigin: "center top",
           }}
         >
           普析35周年盛典暨第十五届职工代表大会抽奖活动
@@ -369,16 +436,15 @@ export default function RafflePage({
             >
               {/* 左侧：奖品图片展示区 (无论是否有图片路径都预留完美的红底边框位置) */}
               <div
-                className={`${raffle_level === 0 ? "w-[10vw] h-[10vw]" : "w-[12vw] h-[12vw]"} bg-[#750A0A] border-[3px] border-[#FFF6D8] rounded-lg flex items-center justify-center p-2 shadow-2xl relative transition-all`}
+                className={`${isGrandPrize ? "w-[10vw] h-[10vw]" : "w-[12vw] h-[12vw]"} bg-[#750A0A] border-[3px] border-[#FFF6D8] rounded-lg flex items-center justify-center p-2 shadow-2xl relative transition-all`}
               >
                 {imageUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={`/images${imageUrl}`}
                     alt="Prize"
-                    // --- 你可以在这里调整图片大小 ---
-                    // raffle_level === 0 代表特等奖。现在的设置是：特等奖占 65%，其他奖项占 85%
-                    className={`${raffle_level === 0 ? "max-w-[65%] max-h-[65%]" : "max-w-[85%] max-h-[85%]"} object-contain`}
+                    // 特等奖和特别大奖共用大屏单人展示，因此图片尺寸保持同一套配置。
+                    className={`${isGrandPrize ? "max-w-[65%] max-h-[65%]" : "max-w-[85%] max-h-[85%]"} object-contain`}
                   />
                 ) : (
                   <span className="text-white/50 text-[1.5vw] font-bold">
@@ -392,15 +458,13 @@ export default function RafflePage({
                   className="text-[4vw] font-bold text-[#FFF6D8] tracking-widest leading-none"
                   style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}
                 >
-                  {getPrizeName(raffle_level)}
+                  {prizeTitle}
                 </h2>
-                {/* TODO: 这里留给你填入接口传回来的 desc，目前放个占位符 */}
                 <p
                   className="text-[3vw] tracking-wider text-white font-bold"
                   style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.5)" }}
                 >
-                  {/* 例如这里可以用 {prize_desc || "现金200元"} */}
-                  {raffle_level_desc}
+                  {prizeDesc}
                 </p>
               </div>
             </motion.div>

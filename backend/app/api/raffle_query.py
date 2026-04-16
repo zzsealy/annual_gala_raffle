@@ -1,6 +1,12 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.models import RaffleQueue
+from app.special_raffle import (
+    SPECIAL_PRIZE_IMAGE,
+    build_special_desc,
+    is_special_prize_level,
+    normalize_special_position,
+)
 from scripts.init_data import reset_db_data
 
 router = APIRouter()
@@ -10,6 +16,7 @@ class AddQueueInput(BaseModel):
     prize_type: str # 'gift' or 'cash'
     insert_position: str # 'before' or 'after'
     person_num: int # 抽奖人数
+    special_position: str | None = None
 
 @router.get("/raffle_queue")
 async def get_raffle_queue():
@@ -31,11 +38,17 @@ async def add_raffle_queue(input: AddQueueInput):
         2: {'name': '剃须刀', 'cash': '现金500元', 'gift_img': '/raffle/two_gift.png'},
         3: {'name': '背包', 'cash': '现金200元', 'gift_img': '/raffle/three_gift.png'},
     }
-    
-    config = level_map.get(input.prize_level, level_map[3])
-    desc = f"{config['name']}" if input.prize_type == 'gift' else f"{config['cash']}"
-    img_url = config['gift_img'] if input.prize_type == 'gift' else '/raffle/cash.png'
-    person_num = input.person_num
+
+    if is_special_prize_level(input.prize_level):
+        special_position = normalize_special_position(input.special_position)
+        desc = build_special_desc(special_position)
+        img_url = SPECIAL_PRIZE_IMAGE
+        person_num = 1
+    else:
+        config = level_map.get(input.prize_level, level_map[3])
+        desc = f"{config['name']}" if input.prize_type == 'gift' else f"{config['cash']}"
+        img_url = config['gift_img'] if input.prize_type == 'gift' else '/raffle/cash.png'
+        person_num = input.person_num
     
     # 获取需要插入的 order 顺序
     active_queues = await RaffleQueue.filter(is_drawn=False).order_by('order')

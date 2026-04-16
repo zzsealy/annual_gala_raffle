@@ -10,17 +10,29 @@ else:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
+"""
+# 第一次初始化
+aerich init -t app.db.TORTOISE_ORM
+
+# 初始建表
+aerich init-db
+
+# 修改模型后
+aerich migrate 生成迁移文件
+aerich upgrade 应用迁移文件
+
+"""
 
 # 默认连接本地数据库（不再强行依赖 .env，做到开箱即用）
 DB_URL = os.environ.get("DB_URL", "sqlite://data/db.sqlite3")
 
 # 处理 SQLite 在 exe 下的动态绝对路径问题，确保把 data 库创建在 exe 的同级目录下
-if DB_URL and DB_URL.startswith("sqlite://") and "://" in DB_URL:
-    db_relative_path = DB_URL.split("sqlite://")[1]
-    if not os.path.isabs(db_relative_path):
-        absolute_db_path = BASE_DIR / db_relative_path
-        absolute_db_path.parent.mkdir(parents=True, exist_ok=True)
-        DB_URL = f"sqlite://{absolute_db_path}"
+# if DB_URL and DB_URL.startswith("sqlite://") and "://" in DB_URL:
+#     db_relative_path = DB_URL.split("sqlite://")[1]
+#     if not os.path.isabs(db_relative_path):
+#         absolute_db_path = BASE_DIR / db_relative_path
+#         absolute_db_path.parent.mkdir(parents=True, exist_ok=True)
+#         DB_URL = f"sqlite://{absolute_db_path}"
 
 TORTOISE_ORM = {
     "connections": {"default": DB_URL},

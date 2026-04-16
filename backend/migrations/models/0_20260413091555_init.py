@@ -5,37 +5,38 @@ RUN_IN_TRANSACTION = True
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "participants" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "name" VARCHAR(50) NOT NULL /* 人员姓名 */,
-    "code" VARCHAR(50) NOT NULL /* 工号 */,
-    "is_drawn" INT NOT NULL DEFAULT 0 /* 是否已抽奖 */,
-    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) /* 参与抽奖的人员名单 */;
-CREATE TABLE IF NOT EXISTS "raffle_queue" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "prize_level" INT NOT NULL /* 奖项等级，1为一等奖，以此类推, 0特等奖 */,
-    "raffleQueuePersonNum" INT NOT NULL /* 抽奖人数 */,
-    "desc" VARCHAR(100) NOT NULL /* 抽奖描述 */,
-    "img_url" VARCHAR(100) /* 图片路径，用于前端展示 */,
-    "order" INT NOT NULL /* 排序，越小越靠前 */,
-    "is_drawn" INT NOT NULL DEFAULT 0 /* 是否已抽奖 */,
-    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) /* 抽奖队列 */;
-CREATE TABLE IF NOT EXISTS "raffle_records" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "desc" VARCHAR(100) NOT NULL /* 抽奖描述 */,
-    "name" VARCHAR(50) NOT NULL /* 人员姓名 */,
-    "code" VARCHAR(50) NOT NULL /* 工号 */,
-    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "participant_id" INT NOT NULL REFERENCES "participants" ("id") ON DELETE CASCADE /* 中奖人 */
-) /* 中奖记录 */;
-CREATE TABLE IF NOT EXISTS "aerich" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "version" VARCHAR(255) NOT NULL,
-    "app" VARCHAR(100) NOT NULL,
-    "content" JSON NOT NULL
-);"""
+        CREATE TABLE IF NOT EXISTS `participants` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(50) NOT NULL COMMENT '人员姓名',
+    `code` VARCHAR(50) NOT NULL COMMENT '工号',
+    `is_drawn` BOOL NOT NULL COMMENT '是否已抽奖' DEFAULT 0,
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+) CHARACTER SET utf8mb4 COMMENT='参与抽奖的人员名单';
+CREATE TABLE IF NOT EXISTS `raffle_queue` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `prize_level` INT NOT NULL COMMENT '奖项等级，1为一等奖，以此类推, 0特等奖',
+    `raffleQueuePersonNum` INT NOT NULL COMMENT '抽奖人数',
+    `desc` VARCHAR(100) NOT NULL COMMENT '抽奖描述',
+    `img_url` VARCHAR(100) COMMENT '图片路径，用于前端展示',
+    `order` INT NOT NULL COMMENT '排序，越小越靠前',
+    `is_drawn` BOOL NOT NULL COMMENT '是否已抽奖' DEFAULT 0,
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+) CHARACTER SET utf8mb4 COMMENT='抽奖队列';
+CREATE TABLE IF NOT EXISTS `raffle_records` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `desc` VARCHAR(100) NOT NULL COMMENT '抽奖描述',
+    `name` VARCHAR(50) NOT NULL COMMENT '人员姓名',
+    `code` VARCHAR(50) NOT NULL COMMENT '工号',
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `participant_id` INT NOT NULL COMMENT '中奖人',
+    CONSTRAINT `fk_raffle_r_particip_1106caf6` FOREIGN KEY (`participant_id`) REFERENCES `participants` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COMMENT='中奖记录';
+CREATE TABLE IF NOT EXISTS `aerich` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `version` VARCHAR(255) NOT NULL,
+    `app` VARCHAR(100) NOT NULL,
+    `content` JSON NOT NULL
+) CHARACTER SET utf8mb4;"""
 
 
 async def downgrade(db: BaseDBAsyncClient) -> str:

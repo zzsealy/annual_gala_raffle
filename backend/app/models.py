@@ -15,6 +15,22 @@ class Participant(models.Model):
         return self.name
 
 
+class ParticipantSpecial(models.Model):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50, description='人员姓名')
+    # 这里沿用 code 字段名复用前端现有的“编号 + 姓名”展示结构，特别大奖场景下实际存的是桌号。
+    code = fields.CharField(max_length=50, description='桌号')
+    position = fields.CharField(max_length=50, description='左，右')
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    class Meta:
+        table = 'participants_special'
+        table_description = '参与特殊大奖的人员名单'
+
+    def __str__(self):
+        return self.name
+
+
 class RaffleRecord(models.Model):
     id = fields.IntField(pk=True)
     participant = fields.ForeignKeyField('models.Participant', related_name='records', description='中奖人')

@@ -14,7 +14,11 @@ try:
     from fastapi.responses import FileResponse, HTMLResponse
     from app.db import TORTOISE_ORM, BASE_DIR
     from app.api import router as api_router
-    from app.models import Participant
+    from app.models import Participant, ParticipantSpecial
+    from app.participant_import import (
+        build_participants_from_excel,
+        build_special_participants_from_excel,
+    )
 except Exception as e:
     print("❌==========================================❌")
     print("        致命错误：程序核心库载入失败！")
@@ -55,7 +59,7 @@ def open_browser():
 
 @app.on_event("startup")
 async def load_excel_on_startup():
-    """每次启动时，如果是单机执行文件，就弹网页；如果根目录下存在 person.xlsx，就自动读取覆盖数据库内容"""
+    """启动时自动导入普通名单和可选的特别大奖名单，保持两个奖池互不覆盖。"""
     
     # 检测到是打包版exe运行时，触发自动弹窗网页
     if getattr(sys, 'frozen', False):
@@ -64,27 +68,51 @@ async def load_excel_on_startup():
     # 兼容打包后 exe 所在的同级目录 / 无论是普通运行还是 exe 运行
     current_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.getcwd()
     excel_path = os.path.join(current_dir, "person.xlsx")
+    special_excel_candidates = [
+        os.path.join(current_dir, "special_person.xlsx"),
+        os.path.join(current_dir, "person_special.xlsx"),
+    ]
     
     if os.path.exists(excel_path):
         print(f"检测到 {excel_path}，正在自动导入人员名单...")
         try:
-            df = pd.read_excel(excel_path, engine='openpyxl')
-            participant_list = []
+            with open(excel_path, "rb") as excel_file:
+                contents = excel_file.read()
+
+            participant_list = build_participants_from_excel(contents)
             
-            # 删除旧数据，防止每次启动重复插入
+            # 普通名单与特别大奖名单分开导入，避免互相覆盖。
             await Participant.all().delete()
 
-            for val_a, val_f in zip(df.iloc[:, 0], df.iloc[:, 5]):
-                participant_list.append(Participant(
-                    code=str(val_a),
-                    name=str(val_f)
-                ))
-            await Participant.bulk_create(participant_list)
-            print(f"🚀 人员名单自动导入成功，共导入 {len(participant_list)} 条记录！")
+            if participant_list:
+                await Participant.bulk_create(participant_list)
+            print(f"🚀 普通奖池名单自动导入成功，共导入 {len(participant_list)} 条记录！")
         except Exception as e:
             print(f"❌ 导入人员名单失败: {e}")
     else:
         print(f"未在 {current_dir} 检测到 person.xlsx，跳过自动导入。")
+
+    special_excel_path = next(
+        (candidate for candidate in special_excel_candidates if os.path.exists(candidate)),
+        None,
+    )
+    if special_excel_path:
+        print(f"检测到 {special_excel_path}，正在自动导入特别大奖名单...")
+        try:
+            with open(special_excel_path, "rb") as excel_file:
+                contents = excel_file.read()
+
+            special_participant_list = build_special_participants_from_excel(contents)
+            await ParticipantSpecial.all().delete()
+
+            if special_participant_list:
+                await ParticipantSpecial.bulk_create(special_participant_list)
+
+            print(f"🚀 特别大奖奖池自动导入成功，共导入 {len(special_participant_list)} 条记录！")
+        except Exception as e:
+            print(f"❌ 导入特别大奖名单失败: {e}")
+    else:
+        print(f"未在 {current_dir} 检测到 special_person.xlsx 或 person_special.xlsx，跳过特别大奖名单导入。")
 
 app.add_middleware(
     CORSMiddleware,

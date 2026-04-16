@@ -1,7 +1,13 @@
 import random
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.models import RaffleQueue, Participant, RaffleRecord
+from tortoise.expressions import Q
+from app.models import Participant, ParticipantSpecial, RaffleQueue, RaffleRecord
+from app.special_raffle import (
+    extract_special_position,
+    get_special_pool_positions,
+    is_special_prize_level,
+)
 from tortoise.transactions import in_transaction
 
 router = APIRouter()
@@ -22,6 +28,25 @@ async def raffle(input: InputSchema):
         
         if raffle_queue.is_drawn:
             raise HTTPException(status_code=400, detail="该轮次已经抽过奖了")
+
+        if is_special_prize_level(raffle_queue.prize_level):
+            position = extract_special_position(raffle_queue.desc)
+            if not position:
+                raise HTTPException(status_code=400, detail="特别大奖未配置左右半场")
+
+            # 特别大奖只抽一次，不写中奖记录，也不影响普通抽奖池状态。
+            # 工作人员不分左右，因此左右任意一方开奖时都需要一起加入候选池。
+            special_positions = get_special_pool_positions(position)
+            participants = await ParticipantSpecial.filter(
+                Q(position__in=special_positions)
+            ).values('id', 'name', 'code')
+            if not participants:
+                raise HTTPException(status_code=400, detail=f"{position}半场没有可抽取的名单")
+
+            winners = random.sample(participants, 1)
+            raffle_queue.is_drawn = True
+            await raffle_queue.save()
+            return winners
 
         # 2. 拿到所有未抽奖的人员
         participants = await Participant.filter(is_drawn=False).values('id', 'name', 'code')
